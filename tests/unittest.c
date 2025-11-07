@@ -13,6 +13,10 @@ respectively).
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif
 #include "../ini.h"
 
 int User;
@@ -43,11 +47,11 @@ int dumper(void* user, const char* section, const char* name,
 #endif
 
     if (!value) {
-        // Happens when INI_ALLOW_NO_VALUE=1 and line has no value (no '=' or ':')
+        /* Happens when INI_ALLOW_NO_VALUE=1 and line has no value (no '=' or ':') */
         return 1;
     }
 
-    return strcmp(name, "user")==0 && strcmp(value, "parse_error")==0 ? 0 : 1;
+    return strcmp(name, "user") == 0 && strcmp(value, "parse_error") == 0 ? 0 : 1;
 }
 
 void parse(const char* fname) {
@@ -62,6 +66,9 @@ void parse(const char* fname) {
 
 int main(void)
 {
+#ifdef _WIN32
+    _setmode(_fileno(stdout), _O_BINARY);
+#endif
     parse("no_file.ini");
     parse("normal.ini");
     parse("bad_section.ini");
@@ -73,5 +80,7 @@ int main(void)
     parse("duplicate_sections.ini");
     parse("no_value.ini");
     parse("long_section.ini");
+    parse("long_line.ini");
+    parse("name_only_after_error.ini");
     return 0;
 }
